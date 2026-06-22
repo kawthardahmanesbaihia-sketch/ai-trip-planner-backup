@@ -14,7 +14,6 @@ import { ActivitiesGrid } from "./ActivitiesGrid"
 import { EventsPanel } from "./EventsPanel"
 import { MapSection } from "./MapSection"
 import { ItinerarySection } from "./ItinerarySection"
-import { AIInsightBox } from "./AIInsightBox"
 import { TransportSection } from "./TransportSection"
 import { AITransformSection } from "./AITransformSection"
 
@@ -71,6 +70,7 @@ interface DestinationData {
     info: { rating?: number; price?: string; cuisine?: string }
   }>
   transportation?: TransportationInfo
+  events?: any[]
 }
 
 interface SquadEvent {
@@ -148,14 +148,7 @@ export function DestinationDashboard({
               positives={destination.positives}
               negatives={destination.negatives}
               weatherContent={weatherContent}
-              aiContext={aiContext}
-            />
-            <AIInsightBox
-              destinationName={destination.name}
               summary={summary}
-              positives={destination.positives}
-              vibes={aiContext?.vibes}
-              travelStyle={aiContext?.travelStyle}
             />
           </motion.div>
         )
@@ -178,12 +171,25 @@ export function DestinationDashboard({
             <ActivitiesGrid activities={destination.activities} />
           </motion.div>
         )
-      case "events":
+      case "events": {
+        const fallbackEvents = !eventsContent && !squadEvents
+          ? (destination.events ?? []).map((e: any) => ({
+              title:       String(e.name ?? "Event"),
+              category:    String(e.category ?? "Event"),
+              date:        String(e.date ?? ""),
+              matchPct:    85,
+              description: e.description ? String(e.description) : undefined,
+            }))
+          : undefined
         return (
           <motion.div key="events" {...SECTION_VARIANTS}>
-            <EventsPanel eventsContent={eventsContent} events={squadEvents} />
+            <EventsPanel
+              eventsContent={eventsContent}
+              events={squadEvents ?? (fallbackEvents?.length ? fallbackEvents : undefined)}
+            />
           </motion.div>
         )
+      }
       case "map":
         return (
           <motion.div key="map" {...SECTION_VARIANTS}>
@@ -249,7 +255,9 @@ export function DestinationDashboard({
           weatherBadge={weatherBadge}
         />
 
-        <NavTabs activeTab={activeTab} onTabChange={setActiveTab} />
+        <div className="md:hidden">
+          <NavTabs activeTab={activeTab} onTabChange={setActiveTab} />
+        </div>
 
         <div className="pb-24 md:pb-8">
           <AnimatePresence mode="wait">

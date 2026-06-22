@@ -29,13 +29,6 @@ const CATEGORY_STYLE: Record<string, { wrap: string; icon: React.ElementType }> 
 }
 const FALLBACK = { wrap: "bg-muted text-muted-foreground", icon: Calendar }
 
-const SAMPLE_EVENTS: Event[] = [
-  { title: "Cherry Blossom Festival",  category: "Culture",   date: "Apr 1–15",  matchPct: 95, description: "Japan's iconic sakura season — a once-in-a-lifetime experience." },
-  { title: "Ramen & Sake Expo",        category: "Food",      date: "Apr 20",    matchPct: 88, description: "Taste regional ramen styles from across Japan." },
-  { title: "Fuji Trails Open Season",  category: "Adventure", date: "May 1–Sep", matchPct: 80, description: "Hike Japan's iconic peak with guided mountain trails." },
-  { title: "Tokyo Jazz Nights",        category: "Music",     date: "Apr 10–12", matchPct: 72, description: "World-class jazz musicians at iconic Tokyo venues." },
-]
-
 interface EventsPanelProps {
   eventsContent?: ReactNode
   events?: Event[]
@@ -43,7 +36,6 @@ interface EventsPanelProps {
 
 export function EventsPanel({ eventsContent, events }: EventsPanelProps) {
   const [added, setAdded] = useState<Set<number>>(new Set())
-  const displayEvents = events ?? SAMPLE_EVENTS
 
   const toggle = (i: number) =>
     setAdded((prev) => {
@@ -59,81 +51,91 @@ export function EventsPanel({ eventsContent, events }: EventsPanelProps) {
         <p className="text-sm text-muted-foreground">Local events matched to your interests</p>
       </div>
 
-      {/* Existing EventsSection component if provided */}
+      {/* Live Eventbrite events — rendered alone when present */}
       {eventsContent && (
-        <div className="mb-6 rounded-2xl overflow-hidden border border-border">
+        <div className="rounded-2xl overflow-hidden border border-border">
           {eventsContent}
         </div>
       )}
 
-      {/* Premium event cards */}
-      <div className="grid sm:grid-cols-2 gap-4">
-        {displayEvents.map((event, i) => {
-          const style = CATEGORY_STYLE[event.category] ?? FALLBACK
-          const Icon = style.icon
-          const isAdded = added.has(i)
-          return (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.08 }}
-              /* bg-card + border-border auto-switch */
-              className="bg-card rounded-2xl p-5 border border-border shadow-sm hover:shadow-md transition-all duration-300"
-            >
-              <div className="flex items-start justify-between gap-3 mb-3">
-                <div className="flex items-center gap-2">
-                  <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${style.wrap}`}>
-                    <Icon className="w-4 h-4" />
-                  </div>
-                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${style.wrap}`}>
-                    {event.category}
-                  </span>
-                </div>
-                <span className="text-xs text-muted-foreground whitespace-nowrap">{event.date}</span>
-              </div>
-
-              <h3 className="font-bold text-card-foreground text-sm mb-1">{event.title}</h3>
-              {event.description && (
-                <p className="text-xs text-muted-foreground leading-relaxed mb-4">{event.description}</p>
-              )}
-
-              {/* Match progress */}
-              <div className="mb-4">
-                <div className="flex justify-between items-center mb-1.5">
-                  <span className="text-xs text-muted-foreground">Match for you</span>
-                  <span className="text-xs font-bold text-green-600 dark:text-green-400">{event.matchPct}%</span>
-                </div>
-                {/* bg-muted auto-switches */}
-                <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${event.matchPct}%` }}
-                    transition={{ delay: 0.2 + i * 0.08, duration: 0.7, ease: "easeOut" }}
-                    className="h-full rounded-full bg-gradient-to-r from-green-400 to-green-500"
-                  />
-                </div>
-              </div>
-
-              <button
-                onClick={() => toggle(i)}
-                className={`w-full flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-semibold transition-all duration-200 ${
-                  isAdded
-                    ? "bg-green-500 text-white hover:bg-green-600"
-                    /* bg-muted + border-border auto-switch */
-                    : "bg-muted text-foreground hover:bg-muted/80 border border-border"
-                }`}
+      {/* Squad-matched event cards — only when no live eventsContent */}
+      {!eventsContent && events && events.length > 0 && (
+        <div className="grid sm:grid-cols-2 gap-4">
+          {events.map((event, i) => {
+            const style = CATEGORY_STYLE[event.category] ?? FALLBACK
+            const Icon = style.icon
+            const isAdded = added.has(i)
+            return (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.08 }}
+                /* bg-card + border-border auto-switch */
+                className="bg-card rounded-2xl p-5 border border-border shadow-sm hover:shadow-md transition-all duration-300"
               >
-                {isAdded ? (
-                  <><CheckCircle className="w-3.5 h-3.5" /> Added to trip</>
-                ) : (
-                  <><PlusCircle className="w-3.5 h-3.5" /> Add to trip</>
+                <div className="flex items-start justify-between gap-3 mb-3">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${style.wrap}`}>
+                      <Icon className="w-4 h-4" />
+                    </div>
+                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${style.wrap}`}>
+                      {event.category}
+                    </span>
+                  </div>
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">{event.date}</span>
+                </div>
+
+                <h3 className="font-bold text-card-foreground text-sm mb-1">{event.title}</h3>
+                {event.description && (
+                  <p className="text-xs text-muted-foreground leading-relaxed mb-4">{event.description}</p>
                 )}
-              </button>
-            </motion.div>
-          )
-        })}
-      </div>
+
+                {/* Match progress */}
+                <div className="mb-4">
+                  <div className="flex justify-between items-center mb-1.5">
+                    <span className="text-xs text-muted-foreground">Match for you</span>
+                    <span className="text-xs font-bold text-green-600 dark:text-green-400">{event.matchPct}%</span>
+                  </div>
+                  {/* bg-muted auto-switches */}
+                  <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${event.matchPct}%` }}
+                      transition={{ delay: 0.2 + i * 0.08, duration: 0.7, ease: "easeOut" }}
+                      className="h-full rounded-full bg-gradient-to-r from-green-400 to-green-500"
+                    />
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => toggle(i)}
+                  className={`w-full flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-semibold transition-all duration-200 ${
+                    isAdded
+                      ? "bg-green-500 text-white hover:bg-green-600"
+                      /* bg-muted + border-border auto-switch */
+                      : "bg-muted text-foreground hover:bg-muted/80 border border-border"
+                  }`}
+                >
+                  {isAdded ? (
+                    <><CheckCircle className="w-3.5 h-3.5" /> Added to trip</>
+                  ) : (
+                    <><PlusCircle className="w-3.5 h-3.5" /> Add to trip</>
+                  )}
+                </button>
+              </motion.div>
+            )
+          })}
+        </div>
+      )}
+
+      {/* Empty state — no live events and no squad events */}
+      {!eventsContent && (!events || events.length === 0) && (
+        <div className="rounded-2xl border border-border bg-muted/30 p-8 text-center">
+          <Calendar className="w-8 h-8 mx-auto mb-3 text-muted-foreground/40" />
+          <p className="text-sm text-muted-foreground">Set your travel dates to discover events during your trip.</p>
+        </div>
+      )}
     </div>
   )
 }

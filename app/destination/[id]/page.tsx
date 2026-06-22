@@ -73,6 +73,7 @@ interface DestinationData {
     info:     { rating?: number; price?: string; cuisine?: string }
   }>
   transportation?: TransportationInfo
+  events?: any[]
 }
 
 const SQUAD_CONFIG: Record<SquadType, { label: string; emoji: string; tagline: string }> = {
@@ -496,6 +497,7 @@ function DestinationPageInner() {
             country.name,
           ),
           transportation: details.transportation ?? undefined,
+          events: details.events || [],
         })
         console.log("[RUNTIME:page] After setDestination — destination.activities.length (value passed):", _runtimeMappedActs.length)
 
@@ -513,6 +515,7 @@ function DestinationPageInner() {
           restaurants:    [{ name: "Restaurant", rating: 4.5, cuisine: "Local", description: "Great dining", price: "$$", priceLevel: "mid-range", address: "City Center, " + country.name, image: undefined }],
           activities:     [{ name: "Activity", duration: "Full day", description: "Exciting experience", image: undefined }],
           transfers:      [],
+          events:         [],
         })
       }
 

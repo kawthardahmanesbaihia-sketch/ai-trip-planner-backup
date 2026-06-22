@@ -955,45 +955,6 @@ export default function ResultsPage() {
                     )}
                   </motion.section>
 
-                  {/* HOLIDAY OVERLAP */}
-                  {(publicHolidays.length > 0 || events.length > 0) && (
-                    <motion.section initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
-                      <div className="flex items-center gap-2 mb-6">
-                        <div className="h-8 w-8 rounded-lg bg-purple-500 flex items-center justify-center">
-                          <Calendar className="h-4 w-4 text-white" />
-                        </div>
-                        <h2 className="text-2xl font-bold">Holiday & Event Overlap</h2>
-                      </div>
-                      <div className="space-y-3">
-                        {publicHolidays.slice(0, 3).map((holiday: any, i: number) => (
-                          <div key={i} className="flex items-center gap-3 rounded-xl border bg-card px-4 py-3">
-                            <span className="text-lg">🎉</span>
-                            <div>
-                              <p className="font-semibold text-sm">{holiday.name}</p>
-                              <p className="text-xs text-muted-foreground">{new Date(holiday.date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</p>
-                            </div>
-                          </div>
-                        ))}
-                        {events.slice(0, 5).map((event: any, i: number) => (
-                          <div key={`ev-${i}`} className="flex items-center justify-between rounded-xl border bg-card px-4 py-3">
-                            <div className="flex items-center gap-3">
-                              <span className="text-lg">🎪</span>
-                              <div>
-                                <p className="font-semibold text-sm">{event.name}</p>
-                                <p className="text-xs text-muted-foreground">{event.date} · {event.category || "Event"}{event.location ? ` · ${event.location}` : ""}</p>
-                              </div>
-                            </div>
-                            {event.url && event.url !== "https://www.eventbrite.com" && (
-                              <a href={event.url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline ml-3 shrink-0">
-                                Details →
-                              </a>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </motion.section>
-                  )}
-
                   {/* WHERE TO STAY & EAT */}
                   <motion.section initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
                     <div className="flex items-center gap-2 mb-6">
@@ -1113,6 +1074,21 @@ export default function ResultsPage() {
                       )}
                     </div>
 
+                    {publicHolidays.length > 0 && (
+                      <div className="space-y-2 mb-5">
+                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Public Holidays</p>
+                        {publicHolidays.slice(0, 3).map((holiday: any, i: number) => (
+                          <div key={i} className="flex items-center gap-3 rounded-xl border bg-card px-4 py-3">
+                            <span className="text-lg">🎉</span>
+                            <div>
+                              <p className="font-semibold text-sm">{holiday.name}</p>
+                              <p className="text-xs text-muted-foreground">{new Date(holiday.date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
                     {loading && !events.length ? (
                       <SectionLoader label="Searching for events…" />
                     ) : events.length > 0 ? (
@@ -1187,65 +1163,6 @@ export default function ResultsPage() {
                       </div>
                     )}
                   </motion.section>
-
-                  {/* FINAL CTA */}
-                  <motion.section initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }} className="rounded-3xl overflow-hidden border-2 border-primary/20 relative">
-                    <div className="absolute inset-0">
-                      <img src={allPhotos[2] || allPhotos[0] || FALLBACK} alt="" className="w-full h-full object-cover" onError={e => { e.currentTarget.src = FALLBACK }} />
-                      <div className="absolute inset-0 bg-gradient-to-br from-primary/90 to-primary/70 dark:from-primary/95 dark:to-primary/80" />
-                    </div>
-                    <div className="relative z-10 p-10 md:p-14 text-center text-primary-foreground">
-                      <div className="text-5xl mb-4">{flag}</div>
-                      <h2 className="text-3xl md:text-4xl font-black mb-3">Ready for {city}?</h2>
-                      <p className="text-primary-foreground/80 max-w-md mx-auto mb-8 leading-relaxed">
-                        Your AI-matched destination awaits. Build a personalised itinerary or explore the full destination guide.
-                      </p>
-                      <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 rounded-full px-8 py-6 text-base font-bold shadow-xl">
-                          <Link href="/itinerary">
-                            <Calendar className="mr-2 h-5 w-5" />
-                            Generate Itinerary
-                          </Link>
-                        </Button>
-                        <Button
-                          asChild size="lg" variant="outline"
-                          className="border-white/50 text-white hover:bg-white/15 rounded-full px-8 py-6 text-base font-bold"
-                          onClick={() => {
-                            sessionStorage.setItem("selectedCountry", JSON.stringify({
-                              index: activeDestIndex, name: dest.name, city,
-                              climate: dest.climate, vibe: dest.vibe,
-                              matchPercentage: dest.matchPercentage,
-                              image: dest.image ?? null, tags: dest.tags ?? [],
-                              timestamp: Date.now(),
-                            }))
-                          }}
-                        >
-                          <Link href={`/destination/${encodeURIComponent(dest.name)}?squad=${squad}&city=${encodeURIComponent(city)}`}>
-                            <Sparkles className="mr-2 h-5 w-5" />
-                            Full Destination Guide
-                          </Link>
-                        </Button>
-                      </div>
-                    </div>
-                  </motion.section>
-
-                  {/* Destination navigation footer */}
-                  <div className="flex items-center justify-center gap-6 pb-4 pt-2 border-t border-border/50">
-                    <Button variant="ghost" size="sm" onClick={goPrev} disabled={activeDestIndex === 0} className="gap-2">
-                      <ChevronLeft className="h-4 w-4" /> Previous
-                    </Button>
-
-                    {/* Dot indicator */}
-                    <div className="flex items-center gap-2">
-                      {destinations.map((d, i) => (
-                        <button key={d.name} onClick={() => goTo(i)} className={`transition-all rounded-full ${i === activeDestIndex ? "w-6 h-2.5 bg-primary" : "w-2.5 h-2.5 bg-muted-foreground/30 hover:bg-muted-foreground/60"}`} aria-label={`Go to ${d.name}`} />
-                      ))}
-                    </div>
-
-                    <Button variant="ghost" size="sm" onClick={goNext} disabled={activeDestIndex >= destinations.length - 1} className="gap-2">
-                      Next <ChevronRight className="h-4 w-4" />
-                    </Button>
-                  </div>
 
                   <div className="text-center pb-4">
                     <Button asChild variant="ghost" size="sm" className="text-muted-foreground">
